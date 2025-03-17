@@ -60,3 +60,16 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to delete contact' }, { status: 500 });
   }
 }
+
+// Add this function for static generation
+export async function generateStaticParams() {
+  // Fetch all the contact IDs from your database
+  const contacts = await prisma.card.findMany({
+    select: { id: true },
+  });
+
+  // Return an array of static params, which are the IDs of your contacts
+  return contacts.map((contact) => ({
+    id: contact.id.toString(), // Convert to string for dynamic routing
+  }));
+}
