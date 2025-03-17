@@ -24,8 +24,14 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem onClick={() => onEdit(contact)}>Edit</DropdownMenuItem>
-          <DropdownMenuItem
+          {/* <DropdownMenuItem
             onClick={() => onDelete(contact.id)}
+            className="text-red-600"
+          >
+            Delete
+          </DropdownMenuItem> */}
+          <DropdownMenuItem
+            onClick={() => onDelete(contact.id.toString())}
             className="text-red-600"
           >
             Delete

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Contact, setContacts, addContact, updateContact, deleteContact } from '@/lib/store/contactSlice';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,6 @@ import { ContactForm } from '@/components/contact-form';
 import { ContactCard } from '@/components/contact-card';
 import { Plus } from 'lucide-react';
 import { RootState } from '@/lib/store/store';
-import { useState } from 'react';
 
 interface CardData {
   id: number;
@@ -43,10 +42,11 @@ export default function Home() {
         console.error('Failed to fetch contacts:', error);
       }
     };
-    
+
     fetchContacts();
   }, [dispatch]);
 
+  // Handle creating a new contact
   const handleCreateContact = async (values: Omit<Contact, 'id'>) => {
     try {
       const response = await fetch('/api/contacts', {
@@ -65,7 +65,7 @@ export default function Home() {
           phone: data.phone,
           email: data.email,
         }));
-        setIsModalOpen(false);
+        setIsModalOpen(false);  // Close the modal after success
       }
     } catch (error) {
       console.error('Failed to create contact:', error);
@@ -130,15 +130,20 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {contacts.map((contact) => (
-            <ContactCard
-              key={contact.id}
-              contact={contact}
-              onEdit={() => handleEditClick(contact)}
-              onDelete={() => handleDeleteContact(contact.id)}
-            />
-          ))}
+          {contacts && contacts.length > 0 ? (
+            contacts.map((contact) => (
+              <ContactCard
+                key={contact.id}
+                contact={contact}
+                onEdit={() => handleEditClick(contact)}
+                onDelete={() => handleDeleteContact(contact.id)}
+              />
+            ))
+          ) : (
+            <div className="text-center text-gray-500">No contacts</div>
+          )}
         </div>
+
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="sm:max-w-[425px]">
