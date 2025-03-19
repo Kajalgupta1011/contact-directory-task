@@ -32,6 +32,7 @@ export function ContactForm({ initialValues, onSubmit, onCancel }: ContactFormPr
     },
     validationSchema,
     onSubmit: (values) => {
+      console.log(values); // Check if values are correctly passed
       onSubmit(values);
     },
   });
