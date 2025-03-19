@@ -16,13 +16,15 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    // Log incoming request for debugging
+    console.log('Received data:', body);
 
     // Validate input fields
     if (!body.name || !body.email || !body.phone || !body.designation) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Create new contact in the database
+    // Create a new contact
     const contact = await prisma.card.create({
       data: {
         name: body.name,
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(contact, { status: 201 });
   } catch (error) {
-    console.error('Failed to create contact:', error);
+    console.error('Error creating contact:', error); // Logs error for debugging
     return NextResponse.json({ error: 'Failed to create contact' }, { status: 500 });
   }
 }

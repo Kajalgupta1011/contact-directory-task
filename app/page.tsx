@@ -13,10 +13,9 @@ import { RootState } from '@/lib/store/store';
 interface CardData {
   id: number;
   name: string;
-  email: string;
+  designation: string;
   phone: string;
-  company: string;
-  title: string;
+  email: string;
 }
 
 export default function Home() {
@@ -28,91 +27,104 @@ export default function Home() {
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const response = await fetch('/api/contacts');
+        const response = await fetch('/api/contacts'); // Fixed API Route
+        if (!response.ok) throw new Error('Failed to fetch contacts');
         const data: CardData[] = await response.json();
-        const formattedContacts: Contact[] = data.map(card => ({
+
+        const formattedContacts: Contact[] = data.map((card) => ({
           id: card.id.toString(),
           name: card.name,
-          designation: card.title,
+          designation: card.designation,
           phone: card.phone,
           email: card.email,
         }));
+
         dispatch(setContacts(formattedContacts));
       } catch (error) {
-        console.error('Failed to fetch contacts:', error);
+        console.error('Error fetching contacts:', error);
       }
     };
 
     fetchContacts();
   }, [dispatch]);
 
-  // Handle creating a new contact
+  // Create a new contact
+
   const handleCreateContact = async (values: Omit<Contact, 'id'>) => {
     try {
-      const response = await fetch('/api/contacts', {
+      console.log('Received data:', JSON.stringify(values)); // Log incoming request for debugging
+      const response = await fetch('/api/contacts', { // API route for contacts
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(values),
       });
-      if (response.ok) {
-        const data: CardData = await response.json();
-        dispatch(addContact({
+  
+      if (!response.ok) {
+        throw new Error('Failed to create contact');
+      }
+  
+      const data: CardData = await response.json();
+      dispatch(addContact({
+        id: data.id.toString(),
+        name: data.name,
+        designation: data.designation,
+        phone: data.phone,
+        email: data.email,
+      }));
+  
+      setIsModalOpen(false); // Close the modal after success
+    } catch (error) {
+      console.error('Error creating contact:', error); // Logs error for debugging
+    }
+  };
+  
+
+  // Update contact
+  const handleUpdateContact = async (values: Omit<Contact, 'id'>) => {
+    if (!editingContact) return;
+
+    try {
+      const response = await fetch(`/api/contacts/${editingContact.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) throw new Error('Failed to update contact');
+
+      const data: CardData = await response.json();
+      dispatch(
+        updateContact({
           id: data.id.toString(),
           name: data.name,
-          designation: data.title,
+          designation: data.designation,
           phone: data.phone,
           email: data.email,
-        }));
-        setIsModalOpen(false);  // Close the modal after success
-      }
+        })
+      );
+
+      setEditingContact(null);
+      setIsModalOpen(false);
     } catch (error) {
-      console.error('Failed to create contact:', error);
+      console.error('Error updating contact:', error);
     }
   };
 
-  const handleUpdateContact = async (values: Omit<Contact, 'id'>) => {
-    if (editingContact) {
-      try {
-        const response = await fetch(`/api/contacts/${editingContact.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
-        if (response.ok) {
-          const data: CardData = await response.json();
-          dispatch(updateContact({
-            id: data.id.toString(),
-            name: data.name,
-            designation: data.title,
-            phone: data.phone,
-            email: data.email,
-          }));
-          setEditingContact(null);
-          setIsModalOpen(false);
-        }
-      } catch (error) {
-        console.error('Failed to update contact:', error);
-      }
-    }
-  };
-
+  // Delete contact
   const handleDeleteContact = async (id: string) => {
     try {
-      const response = await fetch(`/api/contacts/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        dispatch(deleteContact(id));
-      }
+      const response = await fetch(`/api/contacts/${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete contact');
+
+      dispatch(deleteContact(id));
     } catch (error) {
-      console.error('Failed to delete contact:', error);
+      console.error('Error deleting contact:', error);
     }
   };
 
+  // Open edit modal
   const handleEditClick = (contact: Contact) => {
     setEditingContact(contact);
     setIsModalOpen(true);
@@ -130,7 +142,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {contacts && contacts.length > 0 ? (
+          {contacts.length > 0 ? (
             contacts.map((contact) => (
               <ContactCard
                 key={contact.id}
@@ -144,7 +156,7 @@ export default function Home() {
           )}
         </div>
 
-
+        {/* Modal for Create/Edit */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
