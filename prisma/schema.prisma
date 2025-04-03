@@ -13,4 +13,5 @@ model Card {
   designation String
   phone       String @unique
   email       String @unique
+  companyName String @default("Unknown Company")
 }

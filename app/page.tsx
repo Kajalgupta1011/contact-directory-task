@@ -14,6 +14,7 @@ interface CardData {
   id: number;
   name: string;
   designation: string;
+  companyName: string;
   phone: string;
   email: string;
 }
@@ -35,6 +36,7 @@ export default function Home() {
           id: card.id.toString(),
           name: card.name,
           designation: card.designation,
+          companyName: card.companyName,
           phone: card.phone,
           email: card.email,
         }));
@@ -70,6 +72,7 @@ export default function Home() {
         id: data.id.toString(),
         name: data.name,
         designation: data.designation,
+        companyName: data.companyName,
         phone: data.phone,
         email: data.email,
       }));
@@ -100,6 +103,7 @@ export default function Home() {
           id: data.id.toString(),
           name: data.name,
           designation: data.designation,
+          companyName: data.companyName,
           phone: data.phone,
           email: data.email,
         })

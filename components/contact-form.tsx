@@ -27,6 +27,7 @@ export function ContactForm({ initialValues, onSubmit, onCancel }: ContactFormPr
     initialValues: {
       name: initialValues?.name || '',
       designation: initialValues?.designation || '',
+      companyName: initialValues?.companyName || '',
       phone: initialValues?.phone || '',
       email: initialValues?.email || '',
     },
@@ -62,6 +63,21 @@ export function ContactForm({ initialValues, onSubmit, onCancel }: ContactFormPr
           <div className="text-sm text-red-500">{formik.errors.designation}</div>
         )}
       </div>
+
+      {/* companyName name  */}
+
+      <div className="space-y-2">
+        <Label htmlFor="designation">companyName</Label>
+        <Input
+          id="companyName"
+          {...formik.getFieldProps('companyName')}
+          className={formik.errors.companyName && formik.touched.companyName ? 'border-red-500' : ''}
+        />
+        {formik.touched.companyName && formik.errors.companyName && (
+          <div className="text-sm text-red-500">{formik.errors.companyName}</div>
+        )}
+      </div>
+      {/* companyName name end  */}
 
       <div className="space-y-2">
         <Label htmlFor="phone">Phone Number</Label>
