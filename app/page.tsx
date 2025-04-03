@@ -28,7 +28,8 @@ export default function Home() {
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const response = await fetch('/api/contacts'); // Fixed API Route
+        const response = await fetch('/api/contacts');
+        
         if (!response.ok) throw new Error('Failed to fetch contacts');
         const data: CardData[] = await response.json();
 
@@ -54,8 +55,9 @@ export default function Home() {
 
   const handleCreateContact = async (values: Omit<Contact, 'id'>) => {
     try {
-      console.log('Received data:', JSON.stringify(values)); // Log incoming request for debugging
-      const response = await fetch('/api/contacts', { // API route for contacts
+      console.log('Received data in handleCreateContact: ', JSON.stringify(values)); 
+  
+      const response = await fetch('/api/contacts', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,11 +65,19 @@ export default function Home() {
         body: JSON.stringify(values),
       });
   
+      const responseBody = await response.json(); // Get the actual JSON response
+  
+      console.log('📥 API Response--:', responseBody); // Log the parsed response
+  
       if (!response.ok) {
-        throw new Error('Failed to create contact');
+        // Log the error if the API response is not OK
+        throw new Error(`Failed to create contact: ${responseBody.error || 'Unknown error'}`);
       }
   
-      const data: CardData = await response.json();
+      // Ensure the correct structure of the response is handled
+      const data: CardData = responseBody.data || responseBody; // Adjust based on API response structure
+  
+      // Dispatch the new contact data
       dispatch(addContact({
         id: data.id.toString(),
         name: data.name,
@@ -77,17 +87,20 @@ export default function Home() {
         email: data.email,
       }));
   
-      setIsModalOpen(false); // Close the modal after success
+      // Close the modal after success
+      setIsModalOpen(false); 
     } catch (error) {
       console.error('Error creating contact:', error); // Logs error for debugging
     }
   };
   
+  
 
   // Update contact
   const handleUpdateContact = async (values: Omit<Contact, 'id'>) => {
     if (!editingContact) return;
-
+    console.log("id required to edit:", editingContact.id);
+    
     try {
       const response = await fetch(`/api/contacts/${editingContact.id}`, {
         method: 'PUT',

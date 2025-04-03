@@ -37,6 +37,7 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
         <div>
           <h3 className="text-xl font-semibold text-gray-900">{contact.name}</h3>
           <p className="text-sm text-gray-600">{contact.designation}</p>
+          <p className="text-sm text-gray-600">at {contact.companyName}</p>
         </div>
 
         <div className="space-y-2">

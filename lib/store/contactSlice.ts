@@ -22,7 +22,6 @@ export const contactSlice = createSlice({
   initialState,
   reducers: {
     addContact: (state, action: PayloadAction<Contact>) => {
-      console.log(state); // Check if values are correctly passed
       state.contacts.push(action.payload);
     },
     updateContact: (state, action: PayloadAction<Contact>) => {

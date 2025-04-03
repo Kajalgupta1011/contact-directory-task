@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // GET: Fetch all contacts
 export async function GET() {
   try {
-    const contacts = await prisma.card.findMany();
+    const contacts = await prisma.Card.findMany(); // Fixed: Capital "C"
     return NextResponse.json(contacts);
   } catch (error) {
     console.error('Failed to fetch contacts:', error);
@@ -12,23 +14,23 @@ export async function GET() {
   }
 }
 
-// POST: Create a new contact
+// POST Method: Create a new contact
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    // Log incoming request for debugging
-    console.log('Received data:', body);
+    console.log('Received data in POST Method:', body);
 
     // Validate input fields
-    if (!body.name || !body.email || !body.phone || !body.designation) {
+    if (!body.name || !body.email || !body.phone || !body.designation || !body.companyName) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Create a new contact
-    const contact = await prisma.card.create({
+    const contact = await prisma.Card.create({
       data: {
         name: body.name,
         designation: body.designation,
+        companyName: body.companyName,
         phone: body.phone,
         email: body.email,
       },
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(contact, { status: 201 });
   } catch (error) {
-    console.error('Error creating contact:', error); // Logs error for debugging
-    return NextResponse.json({ error: 'Failed to create contact' }, { status: 500 });
+    console.error('Error creating contact:', error); // Add error logging to the console
+    return NextResponse.json({ error: 'Failed to create contact', details: (error as Error).message }, { status: 500 });
   }
 }
