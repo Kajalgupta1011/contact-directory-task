@@ -10,6 +10,7 @@ import { Contact } from '@/lib/store/contactSlice';
 const validationSchema = Yup.object({
   name: Yup.string().required('Name is required'),
   designation: Yup.string().required('Designation is required'),
+  companyName: Yup.string().required('Company name is required'), // ✅ Added validation
   phone: Yup.string()
     .matches(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number')
     .required('Phone number is required'),
@@ -33,13 +34,14 @@ export function ContactForm({ initialValues, onSubmit, onCancel }: ContactFormPr
     },
     validationSchema,
     onSubmit: (values) => {
-      console.log(values); // Check if values are correctly passed
+      // console.log('Submitting contact:', values);
       onSubmit(values);
     },
   });
 
   return (
     <form onSubmit={formik.handleSubmit} className="space-y-4">
+      {/* Name */}
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input
@@ -52,6 +54,7 @@ export function ContactForm({ initialValues, onSubmit, onCancel }: ContactFormPr
         )}
       </div>
 
+      {/* Designation */}
       <div className="space-y-2">
         <Label htmlFor="designation">Designation</Label>
         <Input
@@ -64,10 +67,9 @@ export function ContactForm({ initialValues, onSubmit, onCancel }: ContactFormPr
         )}
       </div>
 
-      {/* companyName name  */}
-
+      {/* Company Name */}
       <div className="space-y-2">
-        <Label htmlFor="designation">companyName</Label>
+        <Label htmlFor="companyName">Company Name</Label> {/* ✅ Fixed htmlFor */}
         <Input
           id="companyName"
           {...formik.getFieldProps('companyName')}
@@ -77,8 +79,8 @@ export function ContactForm({ initialValues, onSubmit, onCancel }: ContactFormPr
           <div className="text-sm text-red-500">{formik.errors.companyName}</div>
         )}
       </div>
-      {/* companyName name end  */}
 
+      {/* Phone */}
       <div className="space-y-2">
         <Label htmlFor="phone">Phone Number</Label>
         <Input
@@ -92,6 +94,7 @@ export function ContactForm({ initialValues, onSubmit, onCancel }: ContactFormPr
         )}
       </div>
 
+      {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -105,6 +108,7 @@ export function ContactForm({ initialValues, onSubmit, onCancel }: ContactFormPr
         )}
       </div>
 
+      {/* Buttons */}
       <div className="flex justify-end space-x-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel

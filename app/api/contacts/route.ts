@@ -1,44 +1,55 @@
+
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import clientPromise from '@/lib/mongodb';
+import {uri} from '@/lib/mongodb';
+import mongoose from 'mongoose';
 
-const prisma = new PrismaClient();
-
-// GET: Fetch all contacts
 export async function GET() {
   try {
-    const contacts = await prisma.Card.findMany(); // Fixed: Capital "C"
-    return NextResponse.json(contacts);
+    // await mongoose.connect (uri);
+    // return NextResponse.json({ message: 'Connected to MongoDB successfully' });
+    const client = await clientPromise;
+    const db = client.db('contactDB');
+    const collection = db.collection('contacts');
+    const contacts = await collection.find({}).toArray();
+
+    return NextResponse.json(
+      contacts.map((contact) => ({
+        ...contact,
+        id: contact._id.toString(),
+      }))
+    );
   } catch (error) {
     console.error('Failed to fetch contacts:', error);
     return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 });
   }
 }
-
-// POST Method: Create a new contact
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log('Received data in POST Method:', body);
+    console.log('POST body:', body);
 
-    // Validate input fields
-    if (!body.name || !body.email || !body.phone || !body.designation || !body.companyName) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    const requiredFields = ['name', 'email', 'phone', 'designation', 'companyName'];
+    for (const field of requiredFields) {
+      if (!body[field]) {
+        return NextResponse.json({ error: `Missing required field: ${field}` }, { status: 400 });
+      }
     }
 
-    // Create a new contact
-    const contact = await prisma.Card.create({
-      data: {
-        name: body.name,
-        designation: body.designation,
-        companyName: body.companyName,
-        phone: body.phone,
-        email: body.email,
-      },
-    });
+    const client = await clientPromise;
+    const db = client.db('contactDB');
+    const collection = db.collection('contacts');
 
-    return NextResponse.json(contact, { status: 201 });
+    const result = await collection.insertOne(body);
+    console.log('✅ Inserted:', result.insertedId.toString());
+
+    return NextResponse.json({
+      ...body,
+      id: result.insertedId.toString(),
+    }, { status: 201 });
+
   } catch (error) {
-    console.error('Error creating contact:', error); // Add error logging to the console
-    return NextResponse.json({ error: 'Failed to create contact', details: (error as Error).message }, { status: 500 });
+    console.error('❌ Error inserting contact:', error);
+    return NextResponse.json({ error: 'Failed to insert contact' }, { status: 500 });
   }
 }
